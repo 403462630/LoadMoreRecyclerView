@@ -2,13 +2,10 @@
 
 ```
 repositories {
-    maven { url  "http://dl.bintray.com/403462630/maven"  }
+    maven { url 'https://jitpack.io' }
 }
-// 如果你使用的是androidx包，则使用
-implementation 'fc.recyclerview.androidx:library:1.0.7'
 
-// 如果你使用的是support包，则使用
-implementation 'fc.recyclerview:library:1.3.2'
+implementation 'com.github.403462630:LoadMoreRecyclerView:1.0.0'
 ```
 
 

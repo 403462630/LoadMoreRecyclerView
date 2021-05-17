@@ -23,9 +23,9 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'androidx.appcompat:appcompat:1.0.2'
+    implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation project(":library")
 //    implementation "fc.recyclerview.androidx:library:1.0.0"
-    implementation 'androidx.recyclerview:recyclerview:1.0.0'
-    implementation 'fc.nestedscrollview.androidx:library:1.0.5'
+    implementation 'androidx.recyclerview:recyclerview:1.1.0'
+    implementation 'com.github.403462630:FCNestedScrollView:1.0.0'
 }
