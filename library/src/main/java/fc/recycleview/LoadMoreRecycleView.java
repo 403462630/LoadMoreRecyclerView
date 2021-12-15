@@ -2,6 +2,8 @@ package fc.recycleview;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.AttributeSet;
 
 import androidx.annotation.LayoutRes;
@@ -20,14 +22,13 @@ import fc.recycleview.base.ItemScrollAdapter;
  */
 public class LoadMoreRecycleView extends FCRecyclerView {
 
-    private boolean flag;
-
     private ItemNotifyAdapter itemNotifyAdapter;
     private LoadMoreCombinationAdapter fcAdapter;
     private ItemScrollAdapter itemScrollAdapter;
 
     private OnScrollListener mOnScrollListener;
     private String emptyText;
+    private static Handler handler;
 
     @LayoutRes
     private  int dragRes = 0;
@@ -43,6 +44,15 @@ public class LoadMoreRecycleView extends FCRecyclerView {
     private int normalRes = 0;
     private boolean isIdleLoading = false;
     private int lastLoadingItem = 0;
+
+    private boolean startScrollListenerFlag = false;
+    private boolean finishInflateFlag = false;
+    private Runnable finishInflateRunnable = new Runnable() {
+        @Override
+        public void run() {
+            startScrollListenerFlag = true;
+        }
+    };
 
     public void setEmptyText(String emptyText) {
         this.emptyText = emptyText;
@@ -91,7 +101,7 @@ public class LoadMoreRecycleView extends FCRecyclerView {
             if (mOnScrollListener != null) {
                 mOnScrollListener.onScrollStateChanged(recyclerView, newState);
             }
-            if (flag) {
+            if (startScrollListenerFlag) {
                 if (itemScrollAdapter != null) {
                     LayoutManager layoutManager = recyclerView.getLayoutManager();
                     itemScrollAdapter.scroll(layoutManager, newState);
@@ -106,7 +116,7 @@ public class LoadMoreRecycleView extends FCRecyclerView {
                 mOnScrollListener.onScrolled(recyclerView, dx, dy);
             }
             if (!isIdleLoading) {
-                if (flag) {
+                if (startScrollListenerFlag) {
                     if (itemScrollAdapter != null) {
                         boolean scrollFlag = true;
                         LayoutManager layoutManager = recyclerView.getLayoutManager();
@@ -139,14 +149,31 @@ public class LoadMoreRecycleView extends FCRecyclerView {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                flag = true;
+        finishInflateFlag = true;
+        if (!startScrollListenerFlag) {
+            if (handler == null) {
+                handler = new Handler(Looper.getMainLooper());
             }
-        }, 1000);
+            handler.postDelayed(finishInflateRunnable, 1000);
+        }
     }
 
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        handler.removeCallbacks(finishInflateRunnable);
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        if (finishInflateFlag && !startScrollListenerFlag) {
+            if (handler == null) {
+                handler = new Handler(Looper.getMainLooper());
+            }
+            handler.postDelayed(finishInflateRunnable, 1000);
+        }
+    }
 
     @Override
     public void setAdapter(Adapter adapter) {
